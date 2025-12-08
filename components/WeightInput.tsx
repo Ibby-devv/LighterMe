@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
-import { Alert, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WeightInputProps {
   onSave: (weight: number, notes?: string) => Promise<void>;
@@ -46,6 +46,9 @@ export const WeightInput: React.FC<WeightInputProps> = ({
   };
 
   const handleSave = async () => {
+    // Dismiss keyboard first
+    Keyboard.dismiss();
+    
     const weightNum = parseFloat(weight);
     
     if (!weight || isNaN(weightNum) || weightNum <= 0) {

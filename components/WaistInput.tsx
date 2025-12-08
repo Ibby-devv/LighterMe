@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface WaistInputProps {
   onSave: (measurement: number, notes?: string) => Promise<void>;
@@ -28,6 +28,9 @@ export const WaistInput: React.FC<WaistInputProps> = ({
   const iconColor = useThemeColor({}, 'icon');
 
   const handleSave = async () => {
+    // Dismiss keyboard first
+    Keyboard.dismiss();
+    
     const measurementNum = parseFloat(measurement);
     
     if (!measurement || isNaN(measurementNum) || measurementNum <= 0) {

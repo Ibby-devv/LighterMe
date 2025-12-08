@@ -11,6 +11,7 @@ import { useWeeklyAnalytics } from '@/hooks/useWeeklyAnalytics';
 import { useWeightLog } from '@/hooks/useWeightLog';
 import { getWaistEntriesForWeek, getWeightEntriesForWeek, isSameWeek } from '@/services/storageService';
 import { WaistEntry, WeightEntry } from '@/types/data';
+import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -52,6 +53,14 @@ export default function ExploreScreen() {
   useEffect(() => {
     loadWeekEntries();
   }, [loadWeekEntries]);
+
+  // Reload data when screen comes into focus (e.g., after logging in Home tab)
+  useFocusEffect(
+    useCallback(() => {
+      loadWeekEntries();
+      refreshStats();
+    }, [loadWeekEntries, refreshStats])
+  );
 
   const handleEdit = useCallback((entry: WeightEntry) => {
     setEditingEntry(entry);
@@ -306,7 +315,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     textAlign: 'center',
-    lineHeight: 30,
+    lineHeight: 38,
   },
   entriesSection: {
     gap: 8,
