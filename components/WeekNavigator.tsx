@@ -28,8 +28,8 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
       <View style={styles.header}>
         <TouchableOpacity
           onPress={onPrevious}
-          style={[styles.navButton, { borderColor: iconColor }]}>
-          <ThemedText style={[styles.navButtonText, { color: tintColor }]}>←</ThemedText>
+          style={styles.navButton}>
+          <ThemedText style={[styles.navButtonText, { color: tintColor }]}>‹</ThemedText>
         </TouchableOpacity>
 
         <View style={styles.weekDisplay}>
@@ -40,8 +40,8 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
 
         <TouchableOpacity
           onPress={onNext}
-          style={[styles.navButton, { borderColor: iconColor }]}>
-          <ThemedText style={[styles.navButtonText, { color: tintColor }]}>→</ThemedText>
+          style={styles.navButton}>
+          <ThemedText style={[styles.navButtonText, { color: tintColor }]}>›</ThemedText>
         </TouchableOpacity>
       </View>
 
@@ -70,16 +70,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   navButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
+    padding: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   navButtonText: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 32,
+    fontWeight: '300',
   },
   weekDisplay: {
     flex: 1,

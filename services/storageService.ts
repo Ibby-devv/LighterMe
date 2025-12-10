@@ -273,6 +273,7 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
   const previousWeekStart = toISODateString(getWeekStart(previousWeekDate));
   
   const previousWeekEntries = await getWeightEntriesForWeek(previousWeekStart);
+  const previousWaistEntries = await getWaistEntriesForWeek(previousWeekStart);
   
   // Calculate current week stats
   const weights = weekEntries.map((e) => e.weight);
@@ -293,6 +294,17 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
     ? weightAverage - previousWeekAverage
     : null;
   
+  // Calculate waist stats - use latest measurement from each week
+  const currentWeekWaist = waistEntries.length > 0
+    ? waistEntries[waistEntries.length - 1].measurement
+    : null;
+  const previousWeekWaist = previousWaistEntries.length > 0
+    ? previousWaistEntries[previousWaistEntries.length - 1].measurement
+    : null;
+  const waistWeekOverWeekChange = currentWeekWaist !== null && previousWeekWaist !== null
+    ? currentWeekWaist - previousWeekWaist
+    : null;
+  
   return {
     weekStart,
     weekEnd: toISODateString(getWeekEnd(parseISODate(weekStart))),
@@ -303,6 +315,9 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
     previousWeekAverage,
     weekOverWeekChange,
     waistMeasurements: waistEntries,
+    currentWeekWaist,
+    previousWeekWaist,
+    waistWeekOverWeekChange,
   };
 };
 

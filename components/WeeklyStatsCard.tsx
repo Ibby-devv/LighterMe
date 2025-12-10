@@ -17,10 +17,20 @@ export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
     return weight !== null ? `${weight.toFixed(1)} kg` : 'N/A';
   };
 
+  const formatWaist = (waist: number | null) => {
+    return waist !== null ? `${waist.toFixed(1)} cm` : 'N/A';
+  };
+
   const formatChange = (change: number | null) => {
     if (change === null) return null;
     const sign = change > 0 ? '+' : '';
     return `${sign}${change.toFixed(1)} kg`;
+  };
+
+  const formatWaistChange = (change: number | null) => {
+    if (change === null) return null;
+    const sign = change > 0 ? '+' : '';
+    return `${sign}${change.toFixed(1)} cm`;
   };
 
   const getChangeColor = (change: number | null) => {
@@ -81,16 +91,32 @@ export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
         <>
           <View style={styles.divider} />
           <View style={styles.waistSection}>
-            <ThemedText style={styles.statLabel}>Waist Measurements</ThemedText>
-            {stats.waistMeasurements.map((entry) => (
-              <ThemedText key={entry.id} style={styles.waistEntry}>
-                {new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })}
-                : {entry.measurement.toFixed(1)} cm
+            <ThemedText type="subtitle" style={styles.label}>
+              Waist Measurement
+            </ThemedText>
+            <ThemedText type="title" style={[styles.mainValue, { color: tintColor }]}>
+              {formatWaist(stats.currentWeekWaist)}
+            </ThemedText>
+            {stats.waistWeekOverWeekChange !== null && (
+              <ThemedText
+                style={[
+                  styles.change,
+                  { color: getChangeColor(stats.waistWeekOverWeekChange) },
+                ]}>
+                {formatWaistChange(stats.waistWeekOverWeekChange)} vs last week
               </ThemedText>
-            ))}
+            )}
+            <View style={styles.waistEntries}>
+              {stats.waistMeasurements.map((entry) => (
+                <ThemedText key={entry.id} style={styles.waistEntry}>
+                  {new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                  : {entry.measurement.toFixed(1)} cm
+                </ThemedText>
+              ))}
+            </View>
           </View>
         </>
       )}
@@ -153,9 +179,14 @@ const styles = StyleSheet.create({
   },
   waistSection: {
     gap: 8,
+    alignItems: 'center',
+  },
+  waistEntries: {
+    gap: 4,
+    marginTop: 8,
+    alignItems: 'center',
   },
   waistEntry: {
     fontSize: 14,
-    paddingLeft: 8,
   },
 });

@@ -8,6 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "dev": "expo start",
     "clean": "node scripts/clean-build.js",
     "clean:android": "node scripts/clean-build.js",
     "clean:build:debug": "npm run clean && npm run build:debug",

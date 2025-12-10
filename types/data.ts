@@ -26,6 +26,9 @@ export interface WeeklyStats {
   previousWeekAverage: number | null;
   weekOverWeekChange: number | null; // difference from previous week
   waistMeasurements: WaistEntry[];
+  currentWeekWaist: number | null; // latest waist measurement this week
+  previousWeekWaist: number | null; // latest waist measurement previous week
+  waistWeekOverWeekChange: number | null; // difference in waist from previous week
 }
 
 export interface WeekData {
