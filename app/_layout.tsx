@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAutoBackup } from '@/hooks/useAutoBackup';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -11,6 +12,9 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  
+  // Auto-backup on app launch
+  useAutoBackup();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

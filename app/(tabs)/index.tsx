@@ -348,7 +348,6 @@ export default function HomeScreen() {
           mode="date"
           display="default"
           onChange={handleDatePickerChange}
-          maximumDate={new Date()}
         />
       )}
 

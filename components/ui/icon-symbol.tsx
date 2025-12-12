@@ -21,6 +21,7 @@ const MAPPING = {
   // MaterialIcons use snake_case names; choose broadly supported icons to avoid '?' on older sets
   'scalemass.fill': 'fitness-center',
   'chart.bar.fill': 'bar-chart',
+  'gear': 'settings',
 } as IconMapping;
 
 /**

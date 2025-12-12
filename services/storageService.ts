@@ -333,3 +333,94 @@ export const getWaistEntryForDate = async (date: string): Promise<WaistEntry | n
   const entries = await getWaistEntries();
   return entries.find((e) => e.date === date) || null;
 };
+
+// ===== Backup/Restore Operations =====
+
+/**
+ * Clear all weight and waist entries
+ */
+export const clearAllData = async (): Promise<void> => {
+  try {
+    await AsyncStorage.multiRemove([WEIGHT_ENTRIES_KEY, WAIST_ENTRIES_KEY]);
+  } catch (error) {
+    console.error('Error clearing data:', error);
+    throw new Error('Failed to clear all data');
+  }
+};
+
+/**
+ * Import all weight and waist entries (replaces existing data)
+ */
+export const importAllData = async (weightEntries: WeightEntry[], waistEntries: WaistEntry[]): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(WEIGHT_ENTRIES_KEY, JSON.stringify(weightEntries));
+    await AsyncStorage.setItem(WAIST_ENTRIES_KEY, JSON.stringify(waistEntries));
+  } catch (error) {
+    console.error('Error importing data:', error);
+    throw new Error('Failed to import data');
+  }
+};
+
+/**
+ * Get all weight entries (alias for consistency)
+ */
+export const getAllWeightEntries = getWeightEntries;
+
+/**
+ * Get all waist entries (alias for consistency)
+ */
+export const getAllWaistEntries = getWaistEntries;
+
+// ===== Auto-Backup Metadata =====
+
+const AUTO_BACKUP_ENABLED_KEY = 'auto_backup_enabled';
+const LAST_BACKUP_DATE_KEY = 'last_backup_date';
+
+/**
+ * Check if auto-backup is enabled
+ */
+export const isAutoBackupEnabled = async (): Promise<boolean> => {
+  try {
+    const value = await AsyncStorage.getItem(AUTO_BACKUP_ENABLED_KEY);
+    return value === 'true'; // Default to false
+  } catch (error) {
+    console.error('Error checking auto-backup status:', error);
+    return false;
+  }
+};
+
+/**
+ * Enable or disable auto-backup
+ */
+export const setAutoBackupEnabled = async (enabled: boolean): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(AUTO_BACKUP_ENABLED_KEY, enabled.toString());
+  } catch (error) {
+    console.error('Error setting auto-backup status:', error);
+    throw new Error('Failed to update auto-backup setting');
+  }
+};
+
+/**
+ * Get the date of the last auto-backup (ISO format)
+ */
+export const getLastBackupDate = async (): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem(LAST_BACKUP_DATE_KEY);
+  } catch (error) {
+    console.error('Error getting last backup date:', error);
+    return null;
+  }
+};
+
+/**
+ * Set the date of the last auto-backup (ISO format)
+ */
+export const setLastBackupDate = async (date: string): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(LAST_BACKUP_DATE_KEY, date);
+  } catch (error) {
+    console.error('Error setting last backup date:', error);
+    throw new Error('Failed to update last backup date');
+  }
+};
