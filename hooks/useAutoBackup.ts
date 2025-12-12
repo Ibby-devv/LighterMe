@@ -21,8 +21,8 @@ export function useAutoBackup() {
         if (!enabled) return;
 
         // Check if we need a backup today
-        const needsBackup = await shouldCreateAutoBackup();
-        if (!needsBackup) return;
+        //const needsBackup = await shouldCreateAutoBackup();
+        //if (!needsBackup) return;
 
         // Create backup silently
         await createAutoBackup();

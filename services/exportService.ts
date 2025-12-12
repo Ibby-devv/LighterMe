@@ -24,11 +24,15 @@ export async function exportAllData(): Promise<void> {
     const weightEntries = await getAllWeightEntries();
     const waistEntries = await getAllWaistEntries();
 
+    // Sort entries by date (oldest to newest)
+    const sortedWeightEntries = [...weightEntries].sort((a, b) => a.date.localeCompare(b.date));
+    const sortedWaistEntries = [...waistEntries].sort((a, b) => a.date.localeCompare(b.date));
+
     const backupData: BackupData = {
       version: '1.0',
       exportDate: new Date().toISOString(),
-      weightEntries,
-      waistEntries,
+      weightEntries: sortedWeightEntries,
+      waistEntries: sortedWaistEntries,
     };
 
     // Create file with timestamp
@@ -65,11 +69,15 @@ export async function createAutoBackup(): Promise<void> {
     const weightEntries = await getAllWeightEntries();
     const waistEntries = await getAllWaistEntries();
 
+    // Sort entries by date (oldest to newest)
+    const sortedWeightEntries = [...weightEntries].sort((a, b) => a.date.localeCompare(b.date));
+    const sortedWaistEntries = [...waistEntries].sort((a, b) => a.date.localeCompare(b.date));
+
     const backupData: BackupData = {
       version: '1.0',
       exportDate: new Date().toISOString(),
-      weightEntries,
-      waistEntries,
+      weightEntries: sortedWeightEntries,
+      waistEntries: sortedWaistEntries,
     };
 
     // Create auto-backups directory if it doesn't exist
