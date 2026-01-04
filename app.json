@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.lighterme.app",
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/ic_launcher_foreground.png",

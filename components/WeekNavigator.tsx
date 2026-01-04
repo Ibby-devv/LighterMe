@@ -45,15 +45,17 @@ export const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         </TouchableOpacity>
       </View>
 
-      {!isCurrentWeek && (
-        <TouchableOpacity
-          onPress={onToday}
-          style={[styles.todayButton, { backgroundColor: tintColor }]}>
-          <ThemedText style={[styles.todayButtonText, { color: '#fff' }]}>
-            Go to Current Week
-          </ThemedText>
-        </TouchableOpacity>
-      )}
+      <View style={styles.todayButtonContainer}>
+        {!isCurrentWeek && (
+          <TouchableOpacity
+            onPress={onToday}
+            style={[styles.todayButton, { backgroundColor: tintColor }]}>
+            <ThemedText style={[styles.todayButtonText, { color: '#fff' }]}>
+              Go to Current Week
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+      </View>
     </ThemedView>
   );
 };
@@ -86,6 +88,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     textAlign: 'center',
+  },
+  todayButtonContainer: {
+    minHeight: 50,
+    justifyContent: 'center',
   },
   todayButton: {
     paddingVertical: 10,

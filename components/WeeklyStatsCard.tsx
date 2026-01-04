@@ -1,15 +1,16 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { WeeklyStats } from '@/types/data';
+import { ComparisonPeriod, WeeklyStats } from '@/types/data';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 interface WeeklyStatsCardProps {
   stats: WeeklyStats;
+  comparisonPeriod: ComparisonPeriod;
 }
 
-export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
+export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats, comparisonPeriod }) => {
   const tintColor = useThemeColor({}, 'tint');
   const iconColor = useThemeColor({}, 'icon');
 
@@ -38,6 +39,14 @@ export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
     return change < 0 ? '#2ecc71' : change > 0 ? '#e74c3c' : iconColor;
   };
 
+  const getPeriodLabel = (period: ComparisonPeriod) => {
+    return period === '1w' ? '1 week ago' : period === '2w' ? '2 weeks ago' : '4 weeks ago';
+  };
+
+  // Use comparison period change instead of week-over-week change
+  const weightChange = stats.comparisonPeriodChange;
+  const waistChange = stats.comparisonWaistChange;
+
   return (
     <ThemedView style={styles.container}>
       <View style={styles.mainStat}>
@@ -47,13 +56,13 @@ export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
         <ThemedText type="title" style={[styles.mainValue, { color: tintColor }]}>
           {formatWeight(stats.weightAverage)}
         </ThemedText>
-        {stats.weekOverWeekChange !== null && (
+        {weightChange !== null && (
           <ThemedText
             style={[
               styles.change,
-              { color: getChangeColor(stats.weekOverWeekChange) },
+              { color: getChangeColor(weightChange) },
             ]}>
-            {formatChange(stats.weekOverWeekChange)} vs last week
+            {formatChange(weightChange)} vs {getPeriodLabel(comparisonPeriod)}
           </ThemedText>
         )}
       </View>
@@ -97,13 +106,13 @@ export const WeeklyStatsCard: React.FC<WeeklyStatsCardProps> = ({ stats }) => {
             <ThemedText type="title" style={[styles.mainValue, { color: tintColor }]}>
               {formatWaist(stats.currentWeekWaist)}
             </ThemedText>
-            {stats.waistWeekOverWeekChange !== null && (
+            {waistChange !== null && (
               <ThemedText
                 style={[
                   styles.change,
-                  { color: getChangeColor(stats.waistWeekOverWeekChange) },
+                  { color: getChangeColor(waistChange) },
                 ]}>
-                {formatWaistChange(stats.waistWeekOverWeekChange)} vs last week
+                {formatWaistChange(waistChange)} vs {getPeriodLabel(comparisonPeriod)}
               </ThemedText>
             )}
             <View style={styles.waistEntries}>

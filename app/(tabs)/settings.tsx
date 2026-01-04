@@ -1,20 +1,44 @@
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { exportAllData, getAutoBackupFiles, shareAutoBackup } from '@/services/exportService';
-import { pickAndReadBackupFile, readAutoBackupFile, validateBackupData } from '@/services/importService';
-import { clearAllData, getLastBackupDate, importAllData, isAutoBackupEnabled, setAutoBackupEnabled } from '@/services/storageService';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import {
+  exportAllData,
+  getAutoBackupFiles,
+  shareAutoBackup,
+} from "@/services/exportService";
+import {
+  pickAndReadBackupFile,
+  readAutoBackupFile,
+  validateBackupData,
+} from "@/services/importService";
+import {
+  clearAllData,
+  getLastBackupDate,
+  importAllData,
+  isAutoBackupEnabled,
+  setAutoBackupEnabled,
+} from "@/services/storageService";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
-  const backgroundColor = useThemeColor({}, 'background');
-  const tintColor = useThemeColor({}, 'tint');
-  const iconColor = useThemeColor({}, 'icon');
+  const backgroundColor = useThemeColor({}, "background");
+  const tintColor = useThemeColor({}, "tint");
+  const iconColor = useThemeColor({}, "icon");
   const [isLoading, setIsLoading] = useState(false);
   const [autoBackupEnabled, setAutoBackupEnabledState] = useState(false);
-  const [lastBackupDate, setLastBackupDateState] = useState<string | null>(null);
+  const [lastBackupDate, setLastBackupDateState] = useState<string | null>(
+    null
+  );
   const [autoBackupCount, setAutoBackupCount] = useState(0);
 
   // Load auto-backup settings on mount
@@ -31,7 +55,7 @@ export default function SettingsScreen() {
       setLastBackupDateState(lastDate);
       setAutoBackupCount(files.length);
     } catch (error) {
-      console.error('Failed to load auto-backup settings:', error);
+      console.error("Failed to load auto-backup settings:", error);
     }
   };
 
@@ -39,9 +63,17 @@ export default function SettingsScreen() {
     try {
       setIsLoading(true);
       await exportAllData();
-      Alert.alert('Success', 'Your data has been exported successfully. Save the file to a safe location.');
+      Alert.alert(
+        "Success",
+        "Your data has been exported successfully. Save the file to a safe location."
+      );
     } catch (error) {
-      Alert.alert('Export Failed', error instanceof Error ? error.message : 'An error occurred while exporting data');
+      Alert.alert(
+        "Export Failed",
+        error instanceof Error
+          ? error.message
+          : "An error occurred while exporting data"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -49,25 +81,28 @@ export default function SettingsScreen() {
 
   const handleImport = async () => {
     Alert.alert(
-      'Import Data',
-      'This will replace all existing data with the data from your backup file. Make sure you have a current backup before proceeding.\n\nContinue?',
+      "Import Data",
+      "This will replace all existing data with the data from your backup file. Make sure you have a current backup before proceeding.\n\nContinue?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Import',
-          style: 'destructive',
+          text: "Import",
+          style: "destructive",
           onPress: async () => {
             try {
               setIsLoading(true);
               const data = await pickAndReadBackupFile();
-              
+
               if (!data) {
                 setIsLoading(false);
                 return; // User canceled
               }
 
               if (!validateBackupData(data)) {
-                Alert.alert('Invalid File', 'The backup file appears to be corrupted or invalid. Please select a valid LighterMe backup file.');
+                Alert.alert(
+                  "Invalid File",
+                  "The backup file appears to be corrupted or invalid. Please select a valid LighterMe backup file."
+                );
                 setIsLoading(false);
                 return;
               }
@@ -77,11 +112,20 @@ export default function SettingsScreen() {
               await importAllData(data.weightEntries, data.waistEntries);
 
               Alert.alert(
-                'Import Successful',
-                `Imported ${data.weightEntries.length} weight entries and ${data.waistEntries.length} waist measurements.\n\nExported on: ${new Date(data.exportDate).toLocaleDateString()}`
+                "Import Successful",
+                `Imported ${data.weightEntries.length} weight entries and ${
+                  data.waistEntries.length
+                } waist measurements.\n\nExported on: ${new Date(
+                  data.exportDate
+                ).toLocaleDateString()}`
               );
             } catch (error) {
-              Alert.alert('Import Failed', error instanceof Error ? error.message : 'An error occurred while importing data');
+              Alert.alert(
+                "Import Failed",
+                error instanceof Error
+                  ? error.message
+                  : "An error occurred while importing data"
+              );
             } finally {
               setIsLoading(false);
             }
@@ -96,11 +140,14 @@ export default function SettingsScreen() {
       await setAutoBackupEnabled(value);
       setAutoBackupEnabledState(value);
       if (value) {
-        Alert.alert('Auto-Backup Enabled', 'Your data will be backed up automatically once per day when you open the app.');
+        Alert.alert(
+          "Auto-Backup Enabled",
+          "Your data will be backed up automatically once per day when you open the app."
+        );
       }
     } catch (error) {
-      console.error('Failed to toggle auto-backup:', error);
-      Alert.alert('Error', 'Failed to update auto-backup setting');
+      console.error("Failed to toggle auto-backup:", error);
+      Alert.alert("Error", "Failed to update auto-backup setting");
     }
   };
 
@@ -108,48 +155,56 @@ export default function SettingsScreen() {
     try {
       const files = await getAutoBackupFiles();
       if (files.length === 0) {
-        Alert.alert('No Auto-Backups', 'No automatic backups have been created yet.');
+        Alert.alert(
+          "No Auto-Backups",
+          "No automatic backups have been created yet."
+        );
         return;
       }
 
-      const fileList = files.map(f => `${f.date}`);
+      const fileList = files.map((f) => `${f.date}`);
       Alert.alert(
-        'Restore from Auto-Backup',
-        `Select a backup to restore:\n\n${fileList.join('\n')}\n\n⚠️ This will replace all current data!`,
+        "Restore from Auto-Backup",
+        `Select a backup to restore:\n\n${fileList.join(
+          "\n"
+        )}\n\n⚠️ This will replace all current data!`,
         [
-          ...files.map(file => ({
+          ...files.map((file) => ({
             text: file.date,
             onPress: () => confirmAndRestore(file.uri, file.date),
-            style: 'default' as const,
+            style: "default" as const,
           })),
-          { text: 'Cancel', style: 'cancel' },
+          { text: "Cancel", style: "cancel" },
         ],
         { cancelable: true }
       );
     } catch (error) {
-      console.error('Failed to load auto-backups:', error);
-      Alert.alert('Error', 'Failed to load auto-backups');
+      console.error("Failed to load auto-backups:", error);
+      Alert.alert("Error", "Failed to load auto-backups");
     }
   };
 
   const confirmAndRestore = async (uri: string, date: string) => {
     Alert.alert(
-      'Confirm Restore',
+      "Confirm Restore",
       `Restore backup from ${date}?\n\nThis will replace all current data. This action cannot be undone.`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Restore',
-          style: 'destructive',
+          text: "Restore",
+          style: "destructive",
           onPress: async () => {
             try {
               setIsLoading(true);
-              
+
               // Read and validate the auto-backup
               const data = await readAutoBackupFile(uri);
-              
+
               if (!validateBackupData(data)) {
-                Alert.alert('Invalid Backup', 'The backup file appears to be corrupted.');
+                Alert.alert(
+                  "Invalid Backup",
+                  "The backup file appears to be corrupted."
+                );
                 return;
               }
 
@@ -158,15 +213,18 @@ export default function SettingsScreen() {
               await importAllData(data.weightEntries, data.waistEntries);
 
               Alert.alert(
-                'Restore Successful',
+                "Restore Successful",
                 `Restored ${data.weightEntries.length} weight entries and ${data.waistEntries.length} waist measurements from ${date}.`
               );
 
               // Reload backup settings to update UI
               await loadAutoBackupSettings();
             } catch (error) {
-              console.error('Restore failed:', error);
-              Alert.alert('Restore Failed', error instanceof Error ? error.message : 'An error occurred');
+              console.error("Restore failed:", error);
+              Alert.alert(
+                "Restore Failed",
+                error instanceof Error ? error.message : "An error occurred"
+              );
             } finally {
               setIsLoading(false);
             }
@@ -180,32 +238,43 @@ export default function SettingsScreen() {
     try {
       const files = await getAutoBackupFiles();
       if (files.length === 0) {
-        Alert.alert('No Auto-Backups', 'No automatic backups have been created yet.');
+        Alert.alert(
+          "No Auto-Backups",
+          "No automatic backups have been created yet."
+        );
         return;
       }
 
-      const fileList = files.map(f => `${f.date}`);
+      const fileList = files.map((f) => `${f.date}`);
       Alert.alert(
-        'Auto-Backup Files',
-        `${files.length} backup(s) available:\n\n${fileList.join('\n')}\n\nTap on a date to share that backup.`,
+        "Auto-Backup Files",
+        `${files.length} backup(s) available:\n\n${fileList.join(
+          "\n"
+        )}\n\nTap on a date to share that backup.`,
         [
-          ...files.map(file => ({
+          ...files.map((file) => ({
             text: file.date,
             onPress: () => shareAutoBackup(file.uri),
           })),
-          { text: 'Close', style: 'cancel' },
+          { text: "Close", style: "cancel" },
         ],
         { cancelable: true }
       );
     } catch (error) {
-      console.error('Failed to view auto-backups:', error);
-      Alert.alert('Error', 'Failed to load auto-backups');
+      console.error("Failed to view auto-backups:", error);
+      Alert.alert("Error", "Failed to load auto-backups");
     }
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor }]} edges={['top', 'left', 'right']}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor }]}
+      edges={["top", "left", "right"]}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+      >
         <ThemedView style={styles.content}>
           <ThemedText type="title" style={styles.header}>
             Settings
@@ -215,42 +284,65 @@ export default function SettingsScreen() {
             <ThemedText type="subtitle" style={styles.sectionTitle}>
               Auto-Backup
             </ThemedText>
-            <ThemedText style={[styles.sectionDescription, { color: iconColor }]}>
-              Automatically backup your data once per day when you open the app. Backups are stored locally and kept for 7 days.
+            <ThemedText
+              style={[styles.sectionDescription, { color: iconColor }]}
+            >
+              Automatically backup your data once per day when you open the app.
+              Backups are stored locally and kept for 7 days.
             </ThemedText>
 
             <View style={styles.switchRow}>
-              <ThemedText style={styles.switchLabel}>Enable Auto-Backup</ThemedText>
+              <ThemedText style={styles.switchLabel}>
+                Enable Auto-Backup
+              </ThemedText>
               <Switch
                 value={autoBackupEnabled}
                 onValueChange={handleToggleAutoBackup}
-                trackColor={{ false: '#767577', true: tintColor }}
+                trackColor={{ false: "#767577", true: tintColor }}
                 thumbColor="#f4f3f4"
               />
             </View>
 
             {autoBackupEnabled && lastBackupDate && (
               <ThemedText style={[styles.infoText, { color: iconColor }]}>
-                Last backup: {new Date(lastBackupDate).toLocaleDateString()}
-                {autoBackupCount > 0 && ` • ${autoBackupCount} backup(s) stored`}
+                Last backup:{" "}
+                {new Date(lastBackupDate).toLocaleString("en-AU", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+                {autoBackupCount > 0 &&
+                  ` • ${autoBackupCount} backup(s) stored`}
               </ThemedText>
             )}
 
             {autoBackupEnabled && autoBackupCount > 0 && (
               <View style={styles.buttonRow}>
                 <TouchableOpacity
-                  style={[styles.button, styles.flexButton, { backgroundColor: tintColor }]}
+                  style={[
+                    styles.button,
+                    styles.flexButton,
+                    { backgroundColor: tintColor },
+                  ]}
                   onPress={handleRestoreFromAutoBackup}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <ThemedText style={styles.buttonText}>↩️ Restore</ThemedText>
+                    <ThemedText style={styles.buttonText}>
+                      ↩️ Restore
+                    </ThemedText>
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.button, styles.flexButton, styles.tertiaryButton, { borderColor: iconColor }]}
-                  onPress={handleViewAutoBackups}>
+                  style={[
+                    styles.button,
+                    styles.flexButton,
+                    styles.tertiaryButton,
+                    { borderColor: iconColor },
+                  ]}
+                  onPress={handleViewAutoBackups}
+                >
                   <ThemedText style={[styles.buttonText, { color: iconColor }]}>
                     📋 Share
                   </ThemedText>
@@ -263,26 +355,37 @@ export default function SettingsScreen() {
             <ThemedText type="subtitle" style={styles.sectionTitle}>
               Manual Backup
             </ThemedText>
-            <ThemedText style={[styles.sectionDescription, { color: iconColor }]}>
-              Export your data to create a backup file, or import data from a previous backup. 
-              The backup file is in JSON format and can be saved to your device or cloud storage.
+            <ThemedText
+              style={[styles.sectionDescription, { color: iconColor }]}
+            >
+              Export your data to create a backup file, or import data from a
+              previous backup. The backup file is in JSON format and can be
+              saved to your device or cloud storage.
             </ThemedText>
 
             <TouchableOpacity
               style={[styles.button, { backgroundColor: tintColor }]}
               onPress={handleExport}
-              disabled={isLoading}>
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <ThemedText style={styles.buttonText}>📤 Export All Data</ThemedText>
+                <ThemedText style={styles.buttonText}>
+                  📤 Export All Data
+                </ThemedText>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.secondaryButton, { borderColor: tintColor }]}
+              style={[
+                styles.button,
+                styles.secondaryButton,
+                { borderColor: tintColor },
+              ]}
               onPress={handleImport}
-              disabled={isLoading}>
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <ActivityIndicator color={tintColor} />
               ) : (
@@ -298,14 +401,14 @@ export default function SettingsScreen() {
               About
             </ThemedText>
             <ThemedText style={[styles.aboutText, { color: iconColor }]}>
-              LighterMe - Weight & Waist Tracker{'\n'}
+              LighterMe - Weight & Waist Tracker{"\n"}
               Version 1.0.0
             </ThemedText>
           </ThemedView>
 
           <ThemedView style={styles.section}>
             <ThemedText style={[styles.warningText, { color: iconColor }]}>
-              ⚠️ Important: Always keep your backup files in a safe location. 
+              ⚠️ Important: Always keep your backup files in a safe location.
               Importing a backup will permanently replace all current data.
             </ThemedText>
           </ThemedView>
@@ -327,16 +430,16 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   content: {
-    width: '100%',
+    width: "100%",
     maxWidth: 640,
-    alignSelf: 'center',
+    alignSelf: "center",
     paddingVertical: 20,
     gap: 24,
   },
   header: {
     marginTop: 20,
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 38,
   },
   section: {
@@ -353,18 +456,18 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     minHeight: 52,
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 2,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   aboutText: {
     fontSize: 14,
@@ -373,12 +476,12 @@ const styles = StyleSheet.create({
   warningText: {
     fontSize: 12,
     lineHeight: 18,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 8,
   },
   switchLabel: {
@@ -389,11 +492,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   tertiaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
   },
   buttonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   flexButton: {

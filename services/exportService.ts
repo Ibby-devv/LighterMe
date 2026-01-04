@@ -2,10 +2,11 @@ import type { WaistEntry, WeightEntry } from '@/types/data';
 import { Directory, File, Paths } from 'expo-file-system';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
 import {
-    getAllWaistEntries,
-    getAllWeightEntries,
-    getLastBackupDate,
-    setLastBackupDate
+  getAllWaistEntries,
+  getAllWeightEntries,
+  getLastBackupDate,
+  setLastBackupDate,
+  toISODateString
 } from './storageService';
 
 export interface BackupData {
@@ -35,8 +36,8 @@ export async function exportAllData(): Promise<void> {
       waistEntries: sortedWaistEntries,
     };
 
-    // Create file with timestamp
-    const timestamp = new Date().toISOString().split('T')[0];
+    // Create file with timestamp (local timezone)
+    const timestamp = toISODateString(new Date());
     const fileName = `lighterme-backup-${timestamp}.json`;
     const file = new File(Paths.document, fileName);
     
@@ -86,16 +87,16 @@ export async function createAutoBackup(): Promise<void> {
       autoBackupsDir.create();
     }
 
-    // Create backup file with date
-    const date = new Date().toISOString().split('T')[0];
+    // Create backup file with date (local timezone)
+    const date = toISODateString(new Date());
     const fileName = `auto-backup-${date}.json`;
     const file = new File(autoBackupsDir, fileName);
     
     // Write backup file
     await file.write(JSON.stringify(backupData, null, 2));
 
-    // Update last backup date
-    await setLastBackupDate(date);
+    // Update last backup timestamp
+    await setLastBackupDate(new Date().toISOString());
 
     // Clean up old backups (keep last 7 days)
     await cleanupOldBackups(autoBackupsDir, 7);
@@ -134,10 +135,15 @@ async function cleanupOldBackups(directory: Directory, keepCount: number): Promi
  */
 export async function shouldCreateAutoBackup(): Promise<boolean> {
   try {
-    const lastBackupDate = await getLastBackupDate();
-    const today = new Date().toISOString().split('T')[0];
+    const lastBackupTimestamp = await getLastBackupDate();
+    const today = toISODateString(new Date());
     
-    // Need backup if never backed up or last backup was not today
+    if (!lastBackupTimestamp) return true; // Never backed up
+    
+    // Extract date from timestamp and compare
+    const lastBackupDate = lastBackupTimestamp.split('T')[0];
+    
+    // Need backup if last backup was not today
     return lastBackupDate !== today;
   } catch (error) {
     console.error('Error checking backup status:', error);

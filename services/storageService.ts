@@ -1,4 +1,4 @@
-import { WaistEntry, WeeklyStats, WeightEntry } from '@/types/data';
+import { ComparisonPeriod, WaistEntry, WeeklyStats, WeightEntry } from '@/types/data';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WEIGHT_ENTRIES_KEY = 'weight_entries';
@@ -260,9 +260,9 @@ export const getWaistEntriesForWeek = async (weekStart: string): Promise<WaistEn
 };
 
 /**
- * Calculate weekly statistics for weight entries
+ * Calculate weekly statistics for weight entries with configurable comparison period
  */
-export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> => {
+export const getWeeklyStats = async (weekStart: string, comparisonPeriod: ComparisonPeriod = '1w'): Promise<WeeklyStats> => {
   const weekEntries = await getWeightEntriesForWeek(weekStart);
   const waistEntries = await getWaistEntriesForWeek(weekStart);
   
@@ -274,6 +274,37 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
   
   const previousWeekEntries = await getWeightEntriesForWeek(previousWeekStart);
   const previousWaistEntries = await getWaistEntriesForWeek(previousWeekStart);
+  
+  // Calculate comparison period week (1w, 2w, or 4w ago)
+  const weeksAgo = comparisonPeriod === '1w' ? 1 : comparisonPeriod === '2w' ? 2 : 4;
+  const comparisonWeekDate = new Date(currentWeekDate);
+  comparisonWeekDate.setDate(comparisonWeekDate.getDate() - (7 * weeksAgo));
+  const comparisonWeekStart = toISODateString(getWeekStart(comparisonWeekDate));
+  
+  let comparisonWeekEntries = await getWeightEntriesForWeek(comparisonWeekStart);
+  let comparisonWaistEntries = await getWaistEntriesForWeek(comparisonWeekStart);
+  
+  // If no data for comparison period, fall back to earliest available data
+  if (comparisonWeekEntries.length === 0) {
+    const allEntries = await getWeightEntries();
+    if (allEntries.length > 0) {
+      // Sort by date and get the earliest week
+      const sortedEntries = allEntries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const earliestDate = parseISODate(sortedEntries[0].date);
+      const earliestWeekStart = toISODateString(getWeekStart(earliestDate));
+      comparisonWeekEntries = await getWeightEntriesForWeek(earliestWeekStart);
+    }
+  }
+  
+  if (comparisonWaistEntries.length === 0) {
+    const allWaistEntries = await getWaistEntries();
+    if (allWaistEntries.length > 0) {
+      const sortedEntries = allWaistEntries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const earliestDate = parseISODate(sortedEntries[0].date);
+      const earliestWeekStart = toISODateString(getWeekStart(earliestDate));
+      comparisonWaistEntries = await getWaistEntriesForWeek(earliestWeekStart);
+    }
+  }
   
   // Calculate current week stats
   const weights = weekEntries.map((e) => e.weight);
@@ -294,6 +325,17 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
     ? weightAverage - previousWeekAverage
     : null;
   
+  // Calculate comparison period average
+  const comparisonWeights = comparisonWeekEntries.map((e) => e.weight);
+  const comparisonPeriodAverage = comparisonWeights.length > 0
+    ? comparisonWeights.reduce((sum, w) => sum + w, 0) / comparisonWeights.length
+    : null;
+  
+  // Calculate comparison period change
+  const comparisonPeriodChange = weightAverage !== null && comparisonPeriodAverage !== null
+    ? weightAverage - comparisonPeriodAverage
+    : null;
+  
   // Calculate waist stats - use latest measurement from each week
   const currentWeekWaist = waistEntries.length > 0
     ? waistEntries[waistEntries.length - 1].measurement
@@ -305,6 +347,14 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
     ? currentWeekWaist - previousWeekWaist
     : null;
   
+  // Calculate comparison period waist
+  const comparisonPeriodWaist = comparisonWaistEntries.length > 0
+    ? comparisonWaistEntries[comparisonWaistEntries.length - 1].measurement
+    : null;
+  const comparisonWaistChange = currentWeekWaist !== null && comparisonPeriodWaist !== null
+    ? currentWeekWaist - comparisonPeriodWaist
+    : null;
+  
   return {
     weekStart,
     weekEnd: toISODateString(getWeekEnd(parseISODate(weekStart))),
@@ -314,10 +364,14 @@ export const getWeeklyStats = async (weekStart: string): Promise<WeeklyStats> =>
     weightCount: weekEntries.length,
     previousWeekAverage,
     weekOverWeekChange,
+    comparisonPeriodAverage,
+    comparisonPeriodChange,
     waistMeasurements: waistEntries,
     currentWeekWaist,
     previousWeekWaist,
     waistWeekOverWeekChange,
+    comparisonPeriodWaist,
+    comparisonWaistChange,
   };
 };
 
@@ -402,7 +456,7 @@ export const setAutoBackupEnabled = async (enabled: boolean): Promise<void> => {
 };
 
 /**
- * Get the date of the last auto-backup (ISO format)
+ * Get the timestamp of the last auto-backup (ISO format with time)
  */
 export const getLastBackupDate = async (): Promise<string | null> => {
   try {
@@ -414,7 +468,7 @@ export const getLastBackupDate = async (): Promise<string | null> => {
 };
 
 /**
- * Set the date of the last auto-backup (ISO format)
+ * Set the timestamp of the last auto-backup (ISO format with time)
  */
 export const setLastBackupDate = async (date: string): Promise<void> => {
   try {

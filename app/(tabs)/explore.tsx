@@ -1,3 +1,4 @@
+import { PeriodToggle } from '@/components/PeriodToggle';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WaistInput } from '@/components/WaistInput';
@@ -10,7 +11,7 @@ import { useWaistLog } from '@/hooks/useWaistLog';
 import { useWeeklyAnalytics } from '@/hooks/useWeeklyAnalytics';
 import { useWeightLog } from '@/hooks/useWeightLog';
 import { getWaistEntriesForWeek, getWeightEntriesForWeek, isSameWeek } from '@/services/storageService';
-import { WaistEntry, WeightEntry } from '@/types/data';
+import { ComparisonPeriod, WaistEntry, WeightEntry } from '@/types/data';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -21,6 +22,8 @@ export default function ExploreScreen() {
   const iconColor = useThemeColor({}, 'icon');
   const tintColor = useThemeColor({}, 'tint');
 
+  const [comparisonPeriod, setComparisonPeriod] = useState<ComparisonPeriod>('1w');
+
   const {
     stats,
     currentWeekStart,
@@ -28,7 +31,7 @@ export default function ExploreScreen() {
     goToNextWeek,
     goToCurrentWeek,
     refresh: refreshStats,
-  } = useWeeklyAnalytics();
+  } = useWeeklyAnalytics(undefined, comparisonPeriod);
 
   const { editEntry: editWeight, removeEntry: deleteWeight } = useWeightLog();
   const { editEntry: editWaist, removeEntry: deleteWaist } = useWaistLog();
@@ -148,9 +151,14 @@ export default function ExploreScreen() {
           isCurrentWeek={isCurrentWeek}
         />
 
+        <PeriodToggle
+          selectedPeriod={comparisonPeriod}
+          onPeriodChange={setComparisonPeriod}
+        />
+
         {stats && stats.weightCount > 0 && (
           <>
-            <WeeklyStatsCard stats={stats} />
+            <WeeklyStatsCard stats={stats} comparisonPeriod={comparisonPeriod} />
 
             <ThemedView style={styles.entriesSection}>
               <ThemedText type="subtitle" style={styles.sectionTitle}>
